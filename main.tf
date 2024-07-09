@@ -1,11 +1,69 @@
 # tf files are processed as if they're one file - you can seperate it as you see fit
 
 resource "aws_vpc" "example_vpc" {
-    cidr_block = "70.22.146.138/16"
-    enable_dns_hostnames = true
-    enable_dns_support = true
+  cidr_block           = "70.22.0.0/16"
+  enable_dns_hostnames = true
+  enable_dns_support   = true
 
-    tags = {
-        Name = "dev"
+  tags = {
+    Name = "dev"
+  }
+}
+
+resource "aws_subnet" "example_public_subnet" {
+  vpc_id                  = aws_vpc.example_vpc.id
+  cidr_block              = "70.22.0.0/16"
+  map_public_ip_on_launch = true
+  availability_zone       = "us-west-1b"
+
+  tags = {
+    Name = "dev-public"
+  }
+}
+
+resource "aws_internet_gateway" "example_internet_gateway" {
+  vpc_id = aws_vpc.example_vpc.id
+
+  tags = {
+    Name = "dev-igw"
+  }
+
+}
+
+resource "aws_route_table" "example_public_rt" {
+  vpc_id = aws_vpc.example_vpc.id
+  tags = {
+    Name = "dev_public_rt"
+  }
+}
+
+resource "aws_route" "default_route" {
+  route_table_id         = aws_route_table.example_public_rt.id
+  destination_cidr_block = "0.0.0.0/0"
+  gateway_id             = aws_internet_gateway.example_internet_gateway.id
+}
+
+resource "aws_route_table_association" "example_public_assoc" {
+  subnet_id      = aws_subnet.example_public_subnet.id
+  route_table_id = aws_route_table.example_public_rt.id
+}
+
+resource "aws_security_group" "example_sg" {
+    name = "example_sg"
+    description = "dev security group"
+    vpc_id = aws_vpc.example_vpc.id
+
+    ingress {
+        from_port = 0
+        to_port = 0
+        protocol = "-1"
+        cidr_blocks = ["70.22.0.0/16"]
     }
+    egress {
+        from_port = 0
+        to_port = 0
+        protocol = "-1"
+        cidr_blocks = ["0.0.0.0/0"]
+    }
+
 }
