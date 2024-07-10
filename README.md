@@ -12,3 +12,4 @@ Utilizes SSH keygen for key pair values - store it in ~/.ssh/mtckey
 
 Has a preloaded user_data file that installs docker. Script provided at userdata.tpl
 
+Feel free to clone this repo and use terraform init to start a dev environment for whatever projects you like!
