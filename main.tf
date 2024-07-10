@@ -86,4 +86,12 @@ resource "aws_instance" "dev_node" {
   root_block_device {
     volume_size = 8
   }
+
+  provisioner "local-exec" {
+    command = templatefile("${var.host_os}-ssh-config.tpl", {
+      hostname = self.public_ip,
+      user     = "ubuntu",
+    identityfile = "~/.ssh/mtckey" })
+    interpreter = var.host_os == "mac" ? ["bash", "-c"]  : ["Powershell", "-Command"] 
+    }
 }
